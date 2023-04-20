@@ -5,7 +5,7 @@
 <div class="container">
     <h2 class="mt-4 mb-4">Edit Listing</h2>
 
-    <form action="{% url 'edit' item_id=listing_id %}" method="POST">
+    <form action="{% url 'edit_listing' item_id=listing_id %}" method="POST">
         {% csrf_token %}
 
         {{ form }}

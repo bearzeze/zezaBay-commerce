@@ -14,7 +14,7 @@ Website which enables registred user to post item for auction sales, and to buy 
 * Adding, removing and viewing the comments
 
 ## **How To Use App**
-Website is very easy to use and it is shown in the video available on the [LINK]().
+Website is very easy to use and it is shown in the video available on the [LINK](https://www.youtube.com/watch?v=USWia_9mXqI).
 
 ## **Technical Specifications**
 Frontend design was not main goal of this website, so it can be additionaly improved, even tough there are some specific details that had been done using Bootstrap 5 and own CSS styles. 
