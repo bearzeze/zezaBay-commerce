@@ -1,0 +1,125 @@
+body {
+    padding: 10px;
+}
+
+.title{
+    text-align: center;
+    margin: 20px auto;
+    font-size: 60px;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+.red-letter {
+    color: rgb(229, 50, 56);
+}
+
+.blue-letter {
+    color: rgb(0, 100, 210);
+}
+
+.yellow-letter {
+    color: rgb(245, 175, 2);
+}
+
+.green-letter {
+    color: rgb(134, 184, 23);
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.date-item {
+    color:rgb(142, 142, 140);
+    text-decoration: none;
+}
+
+.date-item a {
+    text-decoration: none;
+}
+
+.comment {
+    border: 1px solid rgb(208, 208, 208);
+    border-radius: 5px;
+    padding: 2% 3% 4% 2%;
+    margin-bottom: 2%;
+}
+
+.comment a {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.comment .details {
+    color: rgb(142, 142, 140);
+    font-size: 0.8em;
+}
+
+
+.watchlist-btnA,
+.watchlist-btnR {
+    color: #B01E28;
+    border-radius: 17px 17px ;
+    cursor: pointer;
+}
+
+a.watchlist-btnA ,
+a.watchlist-btnR {
+    text-decoration: none;
+}
+
+.watchlist-btnA:hover {
+    background-color: #B01E28;
+    color: white;
+}
+
+.watchlist-btnA:hover::after{
+    content: " Save";
+}
+
+.watchlist-btnR:hover {
+    background-color: #141414;
+    color: white;
+}
+
+.comment-btnR:hover {
+    background-color: #6c757D;
+    color: white;
+}
+
+.watchlist-btnR:hover span,
+.comment-btnR:hover span {
+    display: none;
+}
+
+.watchlist-btnR:hover::after {
+    content: " Remove";
+}
+
+
+.comment-btnR:hover::after {
+    content: " Remove";
+}
+
+.comment-btnR 
+{
+    text-decoration: none;
+    color: #6c757D;
+}
+
+
+.notifications {
+    color: black;
+}
+
+.bid {
+    width: 120px;
+}
+
+.bid-details {
+    font-style: italic;
+    color: #6c757D;
+    font-size: 0.9em;
+}

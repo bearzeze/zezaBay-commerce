@@ -1,0 +1,158 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<div class="container">
+
+    {% if messages %}
+    <div class="row content justify-content-center">
+
+        {% for message in messages %}
+        <div class="col-lg-4 alert {% if message.tags %} alert-{{ message.tags }}" {% endif %} role="alert">
+            <h5 class="alert-heading text-center">
+                {{ message }}
+            </h5>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2> {{ listing.name }} </h2>
+
+    <div class="row pt-2 pb-2">
+        <div class="col-7 col-sm-6 col-md-4 col-xl-3">
+            <img class="img-fluid img-thumbnail" src="{{ item.img_URL }}" alt="">
+        </div>
+
+        <div class="col-9 col-md-8 col-xl-9">
+            <p><strong>{{ item.name }}</strong>
+                {% if is_item_new %}
+                <span class="badge rounded-pill bg-primary">{{ item.condition }}</span>
+                {% endif %}
+
+                {% if item_is_active  %}
+                    {% if item_on_watchlist %}
+                    <a href="{% url 'watchlist_remove' item_id=item.id %}"
+                        class="watchlist-btnR badge rounded-pill btn-outline-danger btn-sm active"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                            class="bi bi-heart" viewBox="0 0 16 16">
+                            <path
+                                d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                        </svg><span> Saved&ensp;&ensp;</span></a>
+
+                    {% else %}
+                    <a href="{% url 'watchlist_add' item_id=item.id %}"
+                        class="watchlist-btnA badge rounded-pill btn-outline-danger btn-sm"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                            class="bi bi-heart" viewBox="0 0 16 16">
+                            <path
+                                d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                        </svg><span></span></a>
+                    {% endif %}
+
+                {% elif number_of_bids > 0 %}
+                <span class="badge badge-success bg-secondary">Sold</span>
+                {% else  %}
+                <span class="badge badge-success bg-secondary">Closed</span>
+                {% endif %}
+            </p>
+            <p><strong>Price:</strong> <span class="price">{{ item.price }} €</span></p>
+
+            {% if item_is_active  %}
+            <form action="" method="POST">
+                {% csrf_token %}
+
+                {{ bid_form }}
+
+                <input type="submit" name="place_bid" value="Bid" class="btn btn-success bid">
+                {% if number_of_bids > 0 %}
+
+                <p class="bid-details"> 
+                    {% if number_of_bids == 1 %}
+                        1 bid so far.
+                    {% elif number_of_bids > 1 %}
+                        {{ number_of_bids }} bids so far.
+                    {% endif %}
+
+                    {% if user_current_bid %}
+                        Your bid is the current bid.
+                    {% endif %}
+                </p>
+                {% endif %}
+
+            </form>
+            {% endif %}
+
+
+            <p class="mt-4"><strong>Details:<br></strong> {{ item.details }}</p>
+            <p class="date-item">Created by <a href="{% url 'user_listings' username=item.created_by.username %}">
+                    <b>{{item.created_by.username }}</b></a> on {{ item.date }}</p>
+
+
+            {% if can_be_modified %}
+            <a class="btn btn-primary" href="{% url 'edit_listing' item_id=item.id %}" role="button">Edit</a>
+            {% if item_is_active %}
+            <a class="btn btn-secondary" href="{% url 'close_listing' item_id=item.id %}" role="button">Close
+                Listing</a>
+            {% endif %}
+
+            <a class="btn btn-danger" href="{% url 'delete_listing' item_id=item.id %}" role="button">Delete</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="row pt-5">
+        <div class="col-1">
+
+        </div>
+        <div class="col-8">
+            <b>Your comment:</b>
+            <form action="" method="POST">
+                {% csrf_token %}
+
+                {{ comment_form }}
+
+                <input class="btn btn-success" type="submit" value="Submit" name="post_comment">
+
+            </form>
+            <div class="row mt-5">
+                <h3>All Comments on Item:</h3>
+            </div>
+            {% for comment in all_comments %}
+            <div class="row comment">
+                <span class="mb-1"><b>{{ comment.title }}</b>
+
+                    {% if comment.user == request.user or request.user.is_superuser %}
+
+                    <a href="{% url 'delete_comment' comment_id=comment.id %}"
+                        class=" comment-btnR badge rounded-pill btn-outline-secondary btn-sm"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-trash" viewBox="0 0 16 16">
+                            <path
+                                d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                            <path
+                                d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z" />
+                        </svg><span></span></a> </span>
+
+                {% endif %}
+
+                <br>
+
+                <span class="details mb-1"> Posted by <a
+                        href="{% url 'user_listings' username=comment.user.username%}">{{ comment.user.username}}</a> on
+                    {{ comment.date }}</span>
+                <br>
+                <hr>
+                <p>{{ comment.content }}</p>
+            </div>
+            {% empty %}
+            <p>
+                No comments
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
