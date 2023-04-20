@@ -33,7 +33,6 @@ def listings(request, item_id):
     # All bids on current item order by price in descending order - highest is the first
     item_bids = Bid.objects.filter(item=listing).order_by('-offer')
     numb_of_bids = len(item_bids)
-    print(numb_of_bids)
     user_current_bid = False
     if numb_of_bids > 0 :
         if item_bids[0].bidder == request.user:
@@ -123,7 +122,7 @@ def listings(request, item_id):
 def categories(request, category_id):
     try:
         category = Category.objects.get(pk=category_id)
-        items = Item.objects.filter(category=category)
+        items = Item.objects.filter(category=category, active=True)
         return render(request, "auctions/categories.html", context={"items": items, "category": category.name})
     except:
         messages.warning(request, "No such category")
@@ -245,9 +244,6 @@ def close_listing(request, item_id):
     return HttpResponseRedirect(reverse('listings', kwargs={'item_id':item_id}))
 
         
-
-        
-
 # Only user can see its own watchlist
 def watchlist(request):
     if not request.user.is_authenticated:
@@ -362,10 +358,10 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
-            })
-    else:
+            messages.warning(request, "Invalid username and/or password.")
+            return HttpResponseRedirect(reverse("login"))
+        
+    elif request.method == "GET":
         return render(request, "auctions/login.html")
 
 
@@ -382,10 +378,20 @@ def register(request):
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
-        if password != confirmation:
-            return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
-            })
+        
+        try:
+            if len(username) < 4:
+                error_msg =  "Username needs to have at least 4 characters."
+                raise
+            if len(password) < 6:
+                error_msg =  "Password needs to have at least 6 characters."
+                raise
+            if password != confirmation:
+                error_msg = "Passwords must match."
+                raise
+        except:
+            messages.warning(request, error_msg)
+            return HttpResponseRedirect(reverse("register"))
 
         # Attempt to create new user
         try:

@@ -107,16 +107,17 @@
 
         </div>
         <div class="col-8">
+            {% if request.user.is_authenticated %}
             <b>Your comment:</b>
-            <form action="" method="POST">
+            <form action="" method="POST" class="mb-4">
                 {% csrf_token %}
 
                 {{ comment_form }}
 
                 <input class="btn btn-success" type="submit" value="Submit" name="post_comment">
-
             </form>
-            <div class="row mt-5">
+            {% endif %}
+            <div class="row mt-1">
                 <h3>All Comments on Item:</h3>
             </div>
             {% for comment in all_comments %}

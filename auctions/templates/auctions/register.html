@@ -3,12 +3,21 @@
 {% block body %}
 <div class="container">
 
+    {% if messages %}
+    <div class="row content justify-content-center mb-1">
 
-    <h2 class="mt-4 mb-4">Register</h2>
-
-    {% if message %}
-    <div>{{ message }}</div>
+        {% for message in messages %}
+        <div class="col-lg-4 alert {% if message.tags %} alert-{{ message.tags }}" {% endif %} role="alert">
+            <h5 class="alert-heading text-center">
+                {{ message }}
+            </h5>
+        </div>
+        {% endfor %}
+    </div>
     {% endif %}
+
+    <h2 class="mt-2 mb-4">Register</h2>
+
 
     <div class="row">
         <form action="{% url 'register' %}" method="POST">
