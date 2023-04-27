@@ -19,6 +19,7 @@ def index(request):
     category_list = [entry for entry in category_querySet]
     request.session["categories"] = category_list
     
+    # Only active listings are shown on the main page
     active_listings = Item.objects.filter(active=True)
     return render(request, "auctions/index.html", context={"active_listings": active_listings})
 
@@ -30,43 +31,46 @@ def listings(request, item_id):
         messages.warning(request, "Item doesn't exists.")
         return HttpResponseRedirect(reverse("index"))
     
-    # All bids on current item order by price in descending order - highest is the first
+    # All bids on current item order by price in descending order - item with highest price is the first element
     item_bids = Bid.objects.filter(item=listing).order_by('-offer')
     numb_of_bids = len(item_bids)
+    
+    # Checking wheter user has current bid on the item
     user_current_bid = False
     if numb_of_bids > 0 :
         if item_bids[0].bidder == request.user:
             user_current_bid = True
         
     if request.method == "GET":
-            # If user owns this listing it can close it and modify it
-            user_listing = listing.created_by == request.user
+        # If user owns this listing it can close it and modify it
+        user_listing = listing.created_by == request.user
+        
+        condition = listing.condition == "NEW"
+        
+        try:
+            watchlist = Watchlist.objects.get(user=request.user, item=listing)
+            listing_watched = watchlist.watched
+        except:
+            listing_watched = False
+        
+        item_is_active = listing.active
+        if not item_is_active and user_current_bid:
+            messages.success(request, f"Congratulations! You have bought this item for {item_bids[0].offer} €")
             
-            condition = listing.condition == "NEW"
-            
-            try:
-                watchlist = Watchlist.objects.get(user=request.user, item=listing)
-                listing_watched = watchlist.watched
-            except:
-                listing_watched = False
-            
-            item_is_active = listing.active
-            if not item_is_active and user_current_bid:
-                messages.success(request, f"Congratulations! You have bought this item for {item_bids[0].offer} €")
-            # We want newest comment at the top
-            comments = reversed(Comment.objects.filter(item=listing))
-            
-            return render(request, "auctions/listing.html",
-                        context={"item": listing,
-                                 "is_item_new": condition,
-                                 "can_be_modified": user_listing,
-                                 "item_on_watchlist": listing_watched,
-                                 "comment_form": CommentForm(),
-                                 "bid_form": BidForm(),
-                                 "all_comments": comments,
-                                 "number_of_bids": numb_of_bids,
-                                 "user_current_bid":user_current_bid,
-                                 "item_is_active": item_is_active,})
+        # We want newest comment at the top, and they are added in the database in chronological way
+        comments = reversed(Comment.objects.filter(item=listing))
+        
+        return render(request, "auctions/listing.html",
+                    context={"item": listing,
+                                "is_item_new": condition,
+                                "can_be_modified": user_listing,
+                                "item_on_watchlist": listing_watched,
+                                "comment_form": CommentForm(),
+                                "bid_form": BidForm(),
+                                "all_comments": comments,
+                                "number_of_bids": numb_of_bids,
+                                "user_current_bid":user_current_bid,
+                                "item_is_active": item_is_active,})
             
     elif request.method == "POST":
         
@@ -87,6 +91,7 @@ def listings(request, item_id):
                     title=title,
                     content=form.cleaned_data["content"])
         
+        # Placing bid via BidForm
         if 'place_bid' in request.POST:
             form = BidForm(request.POST)
             if form.is_valid():
@@ -94,7 +99,7 @@ def listings(request, item_id):
                 current_item_price = float(listing.price)
                 
                 # If there are no bids so far, starting price will be target_price,
-                # otherwise every new target price should be 10% higher
+                # otherwise every new target price should be 10% higher than currently shown price
                 if numb_of_bids == 0:
                     target_price = current_item_price
                     tp_format = "{:.2f}".format(target_price)
@@ -111,7 +116,7 @@ def listings(request, item_id):
                     # Listing current price will become that bid
                     listing.price = bid
                     listing.save()
-                    # New bid is created in the model
+                    # New bid is created in the database
                     Bid.objects.create(item=listing, bidder=request.user, offer=bid)
                 else:
                     messages.warning(request, error_message)
@@ -307,7 +312,8 @@ def watchlist_remove(request, item_id):
     except:
         return HttpResponseRedirect(reverse('listings', kwargs={'item_id': item_id}))
 
-
+# Filtering all listings from some user typing its username
+# If user goes to the My listing nav link it will redirect to its own listings
 def user_listings(request, username):
     user_listings = Item.objects.filter(created_by__username=username)
     
@@ -342,7 +348,6 @@ def delete_comment(request, comment_id):
 
     return HttpResponseRedirect(reverse("index"))
         
-    
 
 def login_view(request):
     if request.method == "POST":
