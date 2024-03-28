@@ -36,11 +36,8 @@ def listings(request, item_id):
     numb_of_bids = len(item_bids)
     
     # Checking wheter user has current bid on the item
-    user_current_bid = False
-    if numb_of_bids > 0 :
-        if item_bids[0].bidder == request.user:
-            user_current_bid = True
-        
+    user_current_bid = numb_of_bids > 0 and item_bids[0].bidder == request.user
+       
     if request.method == "GET":
         # If user owns this listing it can close it and modify it
         user_listing = listing.created_by == request.user
